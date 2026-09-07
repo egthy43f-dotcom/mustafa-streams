@@ -1,0 +1,836 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بثوث مصطفى جيم اوفر</title>
+
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #181818;
+      --border: #333;
+      --text: #fff;
+      --muted: #aaa;
+      --red: #e50914;
+      --red-hover: #ff2633;
+      --delete: #980014;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--text);
+      background: var(--bg);
+      font-family: Tahoma, Arial, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      min-height: 70px;
+      padding: 14px 5%;
+      background: rgba(15, 15, 15, 0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      display: grid;
+      place-items: center;
+      width: 43px;
+      height: 31px;
+      background: var(--red);
+      border-radius: 8px;
+      font-size: 18px;
+    }
+
+    .brand h1 {
+      font-size: clamp(16px, 2vw, 23px);
+    }
+
+    .admin-button,
+    .publish-button {
+      padding: 11px 18px;
+      color: white;
+      background: var(--red);
+      border-radius: 7px;
+      transition: 0.2s;
+    }
+
+    .admin-button:hover,
+    .publish-button:hover {
+      background: var(--red-hover);
+      transform: translateY(-1px);
+    }
+
+    .container {
+      width: min(1400px, 90%);
+      margin: auto;
+      padding: 42px 0 60px;
+    }
+
+    .hero {
+      margin-bottom: 30px;
+    }
+
+    .hero h2 {
+      margin-bottom: 8px;
+      font-size: clamp(25px, 4vw, 38px);
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .video-card {
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      transition: 0.2s;
+    }
+
+    .video-card:hover {
+      border-color: #666;
+      transform: translateY(-4px);
+    }
+
+    .video-preview {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+
+    .video-preview video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .play-icon {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      padding-right: 3px;
+      background: rgba(229, 9, 20, 0.95);
+      border-radius: 50%;
+      font-size: 25px;
+    }
+
+    .video-info {
+      padding: 15px;
+    }
+
+    .video-title {
+      display: -webkit-box;
+      overflow: hidden;
+      line-height: 1.6;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .delete-button {
+      width: 100%;
+      margin-top: 13px;
+      padding: 10px;
+      color: white;
+      background: var(--delete);
+      border-radius: 6px;
+      transition: 0.2s;
+    }
+
+    .delete-button:hover {
+      background: #d0001b;
+    }
+
+    .empty-state {
+      padding: 70px 20px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--card);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+
+    .empty-icon {
+      margin-bottom: 15px;
+      font-size: 42px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.82);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      position: relative;
+      width: min(570px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+    }
+
+    .close-button {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      width: 34px;
+      height: 34px;
+      color: white;
+      background: #292929;
+      border-radius: 50%;
+      font-size: 22px;
+    }
+
+    .modal-title {
+      margin-bottom: 24px;
+      font-size: 23px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #eee;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 13px;
+      color: white;
+      background: #101010;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--red);
+    }
+
+    .file-input {
+      padding: 10px !important;
+    }
+
+    .publish-button {
+      width: 100%;
+    }
+
+    .error-message,
+    .success-message {
+      display: none;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .error-message {
+      color: #ffbaba;
+      background: rgba(176, 0, 32, 0.3);
+    }
+
+    .success-message {
+      color: #b7f5c4;
+      background: rgba(20, 130, 55, 0.3);
+    }
+
+    .watch-modal .modal-content {
+      width: min(1000px, 100%);
+      padding: 18px;
+    }
+
+    .watch-video {
+      width: 100%;
+      max-height: 70vh;
+      background: #000;
+      border-radius: 8px;
+    }
+
+    .watch-title {
+      margin-top: 15px;
+      font-size: 20px;
+    }
+
+    .loading {
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 12px 5%;
+      }
+
+      .admin-button {
+        padding: 9px 11px;
+        font-size: 13px;
+      }
+
+      .container {
+        width: 92%;
+        padding-top: 28px;
+      }
+
+      .video-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .modal-content {
+        padding: 24px 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">▶</div>
+      <h1>بثوث مصطفى جيم اوفر</h1>
+    </div>
+
+    <button class="admin-button" id="adminButton">
+      دخول الإدارة
+    </button>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>آخر الفيديوهات</h2>
+      <p>شاهد أحدث البثوث والفيديوهات بجودة عالية.</p>
+    </section>
+
+    <section id="videoGrid" class="video-grid">
+      <div class="loading">جارٍ تحميل الفيديوهات...</div>
+    </section>
+  </main>
+
+  <!-- نافذة تسجيل دخول الإدارة -->
+  <div class="modal" id="pinModal">
+    <div class="modal-content">
+      <button class="close-button" data-close="pinModal">×</button>
+
+      <h2 class="modal-title">دخول الإدارة</h2>
+
+      <form id="pinForm">
+        <div class="form-group">
+          <label for="adminPin">رمز الإدارة</label>
+
+          <input
+            id="adminPin"
+            type="password"
+            placeholder="أدخل رمز الإدارة"
+            autocomplete="off"
+            required
+          >
+        </div>
+
+        <button class="publish-button" type="submit">
+          متابعة
+        </button>
+
+        <div class="error-message" id="pinError">
+          رمز الإدارة غير صحيح.
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة رفع الفيديو -->
+  <div class="modal" id="uploadModal">
+    <div class="modal-content">
+      <button class="close-button" data-close="uploadModal">×</button>
+
+      <h2 class="modal-title">نشر فيديو جديد</h2>
+
+      <form id="uploadForm">
+        <div class="form-group">
+          <label for="videoTitle">عنوان الفيديو</label>
+
+          <input
+            id="videoTitle"
+            type="text"
+            placeholder="اكتب عنوان الفيديو"
+            maxlength="120"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="videoFile">اختيار ملف الفيديو</label>
+
+          <input
+            id="videoFile"
+            class="file-input"
+            type="file"
+            accept="video/mp4,video/webm,video/ogg"
+            required
+          >
+        </div>
+
+        <button class="publish-button" type="submit">
+          نشر الفيديو
+        </button>
+
+        <div class="error-message" id="uploadError"></div>
+
+        <div class="success-message" id="uploadSuccess">
+          تم نشر الفيديو بنجاح.
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة مشاهدة الفيديو -->
+  <div class="modal watch-modal" id="watchModal">
+    <div class="modal-content">
+      <button class="close-button" data-close="watchModal">×</button>
+
+      <video
+        class="watch-video"
+        id="watchVideo"
+        controls
+        playsinline
+      ></video>
+
+      <h2 class="watch-title" id="watchTitle"></h2>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PIN = "oplkoplk";
+    const DATABASE_NAME = "mustafa-game-over-videos";
+    const STORE_NAME = "videos";
+
+    let database;
+    let isAdmin = false;
+
+    const adminButton = document.getElementById("adminButton");
+    const pinModal = document.getElementById("pinModal");
+    const uploadModal = document.getElementById("uploadModal");
+    const watchModal = document.getElementById("watchModal");
+
+    const pinForm = document.getElementById("pinForm");
+    const uploadForm = document.getElementById("uploadForm");
+
+    const videoGrid = document.getElementById("videoGrid");
+    const watchVideo = document.getElementById("watchVideo");
+    const watchTitle = document.getElementById("watchTitle");
+
+    function openModal(modal) {
+      modal.classList.add("active");
+    }
+
+    function closeModal(modal) {
+      modal.classList.remove("active");
+    }
+
+    function showMessage(element, message = "") {
+      if (message) {
+        element.textContent = message;
+      }
+
+      element.style.display = "block";
+    }
+
+    function hideMessage(element) {
+      element.style.display = "none";
+    }
+
+    function openDatabase() {
+      return new Promise(function (resolve, reject) {
+        const request = indexedDB.open(DATABASE_NAME, 1);
+
+        request.onupgradeneeded = function () {
+          const db = request.result;
+
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, {
+              keyPath: "id",
+              autoIncrement: true
+            });
+          }
+        };
+
+        request.onsuccess = function () {
+          database = request.result;
+          resolve(database);
+        };
+
+        request.onerror = function () {
+          reject(request.error);
+        };
+      });
+    }
+
+    function getAllVideos() {
+      return new Promise(function (resolve, reject) {
+        const transaction = database.transaction(STORE_NAME, "readonly");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAll();
+
+        request.onsuccess = function () {
+          resolve(request.result.reverse());
+        };
+
+        request.onerror = function () {
+          reject(request.error);
+        };
+      });
+    }
+
+    function saveVideo(videoData) {
+      return new Promise(function (resolve, reject) {
+        const transaction = database.transaction(STORE_NAME, "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.add(videoData);
+
+        request.onsuccess = function () {
+          resolve();
+        };
+
+        request.onerror = function () {
+          reject(request.error);
+        };
+      });
+    }
+
+    function deleteVideo(videoId) {
+      return new Promise(function (resolve, reject) {
+        const transaction = database.transaction(STORE_NAME, "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(videoId);
+
+        request.onsuccess = function () {
+          resolve();
+        };
+
+        request.onerror = function () {
+          reject(request.error);
+        };
+      });
+    }
+
+    function renderVideos(videos) {
+      videoGrid.innerHTML = "";
+
+      if (videos.length === 0) {
+        videoGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <p>لا توجد فيديوهات منشورة حاليًا.</p>
+          </div>
+        `;
+
+        return;
+      }
+
+      videos.forEach(function (video) {
+        const videoUrl = URL.createObjectURL(video.file);
+        const card = document.createElement("article");
+
+        card.className = "video-card";
+
+        card.innerHTML = `
+          <div class="video-preview">
+            <video
+              src="${videoUrl}"
+              preload="metadata"
+              muted
+              playsinline
+            ></video>
+
+            <div class="play-overlay">
+              <div class="play-icon">▶</div>
+            </div>
+          </div>
+
+          <div class="video-info">
+            <h3 class="video-title"></h3>
+
+            ${
+              isAdmin
+                ? `
+                  <button
+                    class="delete-button"
+                    data-id="${video.id}">
+                    حذف الفيديو
+                  </button>
+                `
+                : ""
+            }
+          </div>
+        `;
+
+        card.querySelector(".video-title").textContent = video.title;
+
+        card.addEventListener("click", function (event) {
+          if (event.target.classList.contains("delete-button")) {
+            return;
+          }
+
+          watchVideo.src = videoUrl;
+          watchTitle.textContent = video.title;
+          openModal(watchModal);
+        });
+
+        if (isAdmin) {
+          const deleteButton = card.querySelector(".delete-button");
+
+          deleteButton.addEventListener("click", async function (event) {
+            event.stopPropagation();
+
+            const confirmed = confirm(
+              "هل أنت متأكد من حذف هذا الفيديو؟"
+            );
+
+            if (!confirmed) {
+              return;
+            }
+
+            try {
+              await deleteVideo(video.id);
+              await loadVideos();
+            } catch (error) {
+              alert("تعذر حذف الفيديو.");
+            }
+          });
+        }
+
+        videoGrid.appendChild(card);
+      });
+    }
+
+    async function loadVideos() {
+      try {
+        const videos = await getAllVideos();
+        renderVideos(videos);
+      } catch (error) {
+        videoGrid.innerHTML = `
+          <div class="empty-state">
+            <p>حدث خطأ أثناء تحميل الفيديوهات.</p>
+          </div>
+        `;
+      }
+    }
+
+    adminButton.addEventListener("click", function () {
+      document.getElementById("adminPin").value = "";
+      hideMessage(document.getElementById("pinError"));
+
+      openModal(pinModal);
+      document.getElementById("adminPin").focus();
+    });
+
+    pinForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const enteredPin = document.getElementById("adminPin").value;
+      const pinError = document.getElementById("pinError");
+
+      if (enteredPin === ADMIN_PIN) {
+        isAdmin = true;
+
+        hideMessage(pinError);
+        closeModal(pinModal);
+        openModal(uploadModal);
+
+        loadVideos();
+      } else {
+        showMessage(pinError);
+      }
+    });
+
+    uploadForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const titleInput = document.getElementById("videoTitle");
+      const fileInput = document.getElementById("videoFile");
+      const uploadError = document.getElementById("uploadError");
+      const uploadSuccess = document.getElementById("uploadSuccess");
+
+      const title = titleInput.value.trim();
+      const file = fileInput.files[0];
+
+      hideMessage(uploadError);
+      hideMessage(uploadSuccess);
+
+      if (!title || !file) {
+        showMessage(
+          uploadError,
+          "يرجى إدخال عنوان الفيديو واختيار ملف."
+        );
+
+        return;
+      }
+
+      if (!file.type.startsWith("video/")) {
+        showMessage(
+          uploadError,
+          "يرجى اختيار ملف فيديو صالح."
+        );
+
+        return;
+      }
+
+      if (file.size > 500 * 1024 * 1024) {
+        showMessage(
+          uploadError,
+          "حجم الفيديو يجب ألا يتجاوز 500 ميغابايت."
+        );
+
+        return;
+      }
+
+      try {
+        await saveVideo({
+          title: title,
+          file: file,
+          createdAt: Date.now()
+        });
+
+        showMessage(uploadSuccess);
+        uploadForm.reset();
+
+        await loadVideos();
+
+        setTimeout(function () {
+          closeModal(uploadModal);
+          hideMessage(uploadSuccess);
+        }, 1000);
+
+      } catch (error) {
+        showMessage(
+          uploadError,
+          "تعذر حفظ الفيديو على هذا الجهاز."
+        );
+      }
+    });
+
+    document.querySelectorAll("[data-close]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const modal = document.getElementById(
+          button.getAttribute("data-close")
+        );
+
+        if (modal === watchModal) {
+          watchVideo.pause();
+          watchVideo.removeAttribute("src");
+          watchVideo.load();
+        }
+
+        closeModal(modal);
+      });
+    });
+
+    [pinModal, uploadModal, watchModal].forEach(function (modal) {
+      modal.addEventListener("click", function (event) {
+        if (event.target === modal) {
+          if (modal === watchModal) {
+            watchVideo.pause();
+            watchVideo.removeAttribute("src");
+            watchVideo.load();
+          }
+
+          closeModal(modal);
+        }
+      });
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        document.querySelectorAll(".modal.active").forEach(function (modal) {
+          closeModal(modal);
+        });
+
+        watchVideo.pause();
+      }
+    });
+
+    async function initializeApp() {
+      try {
+        await openDatabase();
+        await loadVideos();
+      } catch (error) {
+        videoGrid.innerHTML = `
+          <div class="empty-state">
+            <p>المتصفح لا يدعم حفظ الفيديوهات محليًا.</p>
+          </div>
+        `;
+      }
+    }
+
+    initializeApp();
+  </script>
+
+</body>
+</html>
